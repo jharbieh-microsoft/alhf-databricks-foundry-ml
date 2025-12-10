@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human-Feedback Driven Agent Improvement (ALHF-style) in Azure AI Foundry</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/theme/black.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/monokai.css">
+    <style>
+        .reveal h1 {
+            font-size: 2.5em;
+            color: #0078d4;
+        }
+        .reveal h2 {
+            font-size: 1.8em;
+            color: #50e6ff;
+        }
+        .reveal h3 {
+            font-size: 1.4em;
+            color: #fff;
+        }
+        .reveal ul {
+            font-size: 0.9em;
+        }
+        .reveal li {
+            margin-bottom: 0.5em;
+        }
+        .reveal .author-info {
+            margin-top: 2em;
+            font-size: 0.8em;
+            color: #50e6ff;
+        }
+        .reveal .diagram {
+            font-family: 'Courier New', monospace;
+            font-size: 0.6em;
+            background-color: #1e1e1e;
+            padding: 1em;
+            border-radius: 8px;
+            text-align: left;
+            margin: 1em auto;
+            max-width: 600px;
+        }
+        .reveal .highlight-box {
+            background-color: rgba(0, 120, 212, 0.2);
+            border-left: 4px solid #0078d4;
+            padding: 1em;
+            margin: 1em 0;
+        }
+        .reveal .comparison-table {
+            font-size: 0.7em;
+        }
+        .reveal .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2em;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Title -->
+            <section>
+                <h1>Human-Feedback Driven Agent Improvement Loop</h1>
+                <h3>Azure AI Foundry × Databricks ALHF Concepts</h3>
+                <div class="author-info">
+                    <p><strong>Johnny Harbieh</strong></p>
+                    <p>Principal Solution Engineer</p>
+                </div>
+            </section>
+
+            <!-- Slide 2: Why This Matters -->
+            <section>
+                <h2>Why This Matters</h2>
+                <ul>
+                    <li>Enterprise agents require continuous adaptation</li>
+                    <li>Databricks ALHF shows high gains from minimal natural-language feedback</li>
+                    <li>Azure AI Foundry provides the evaluation + observability stack to replicate ALHF loops</li>
+                    <li><strong>Goal:</strong> Build agents that learn and improve from human evaluators + synthetic tests</li>
+                </ul>
+            </section>
+
+            <!-- Slide 3: Conceptual Architecture -->
+            <section>
+                <h2>Conceptual Architecture</h2>
+                <h3>Core Loop:</h3>
+                <ol>
+                    <li>Deploy Agent in Azure AI Foundry</li>
+                    <li>Instrument with Observability + Application Insights</li>
+                    <li>Collect Human Feedback (thumbs, sliders, MCQs, free-text)</li>
+                    <li>Run Synthetic Evaluators (intent, tool-call accuracy, safety)</li>
+                    <li>Aggregate Feedback into Training Dataset</li>
+                    <li>Improve via Fine-tuning, Prompt/Policy Updates, or Workflow Adjustments</li>
+                    <li>Re-evaluate → Repeat</li>
+                </ol>
+            </section>
+
+            <!-- Slide 4: Foundry Components -->
+            <section>
+                <h2>Foundry Components</h2>
+                <ul>
+                    <li><strong>Foundry Agents</strong> (model + tools + policies)</li>
+                    <li><strong>Human Evaluation Templates</strong></li>
+                    <li><strong>Synthetic Evaluators</strong>
+                        <ul>
+                            <li>Intent Resolution</li>
+                            <li>Tool-Call Accuracy</li>
+                            <li>Task Adherence</li>
+                            <li>Groundedness</li>
+                            <li>Safety & Red Teaming</li>
+                        </ul>
+                    </li>
+                    <li><strong>Observability</strong> (Traces, Spans, Tool logs)</li>
+                    <li><strong>Fine-Tuning + Customization Pipeline</strong></li>
+                </ul>
+            </section>
+
+            <!-- Slide 5: Step 1 -->
+            <section>
+                <h2>Step 1: Build & Instrument Agent</h2>
+                <ul>
+                    <li>Choose base model (GPT-4o family or others)</li>
+                    <li>Configure tools (Search, SharePoint, APIs, Functions)</li>
+                    <li>Add system message + task boundaries</li>
+                    <li>Enable Observability:
+                        <ul>
+                            <li>Application Insights</li>
+                            <li>Tracing</li>
+                            <li>Tool-call logs</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Slide 6: Step 2 -->
+            <section>
+                <h2>Step 2: Capture Human Feedback (ALHF-style)</h2>
+                <h3>Use Human Evaluation Templates</h3>
+                <div class="highlight-box">
+                    <strong>Supported inputs:</strong>
+                    <ul>
+                        <li>👍/👎 (binary)</li>
+                        <li>Sliders (quality scoring)</li>
+                        <li>Multiple-choice</li>
+                        <li>Free-form comments</li>
+                    </ul>
+                </div>
+                <p>Reviewers evaluate the agent preview experience</p>
+                <p>Output stored in evaluation tables for analysis</p>
+            </section>
+
+            <!-- Slide 7: Step 3 -->
+            <section>
+                <h2>Step 3: Add Automated/Synthetic Evaluation</h2>
+                <p>Foundry provides built-in evaluators:</p>
+                <ul>
+                    <li><strong>Intent Resolution</strong> — detects if agent understood task</li>
+                    <li><strong>Tool-Call Accuracy</strong> — identifies correct tool usage</li>
+                    <li><strong>Task Adherence</strong> — did final output match instructions?</li>
+                    <li><strong>Groundedness / Hallucination Checks</strong></li>
+                    <li><strong>Safety Evaluators</strong></li>
+                    <li><strong>Red Teaming Agent</strong> (PyRIT integration) adds adversarial probes</li>
+                </ul>
+            </section>
+
+            <!-- Slide 8: Step 4 -->
+            <section>
+                <h2>Step 4: Build Unified Feedback Dataset</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Combine:</h3>
+                        <ul>
+                            <li>Human evaluation scores</li>
+                            <li>Synthetic evaluator outputs</li>
+                            <li>Red-teaming results</li>
+                            <li>Traces & spans</li>
+                            <li>Expected outputs (gold responses)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Construct dataset for:</h3>
+                        <ul>
+                            <li>Fine-tuning</li>
+                            <li>Prompt/policy refinement</li>
+                            <li>Regression testing</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: Step 5 -->
+            <section>
+                <h2>Step 5: Apply Improvements</h2>
+                <div class="highlight-box">
+                    <h3>Option A — Fine-Tuning</h3>
+                    <p>Instruction tuning with curated correction pairs</p>
+                </div>
+                <div class="highlight-box">
+                    <h3>Option B — Prompt / Policy Optimization</h3>
+                    <ul>
+                        <li>Improve system messages</li>
+                        <li>Clarify tool constraints</li>
+                        <li>Add safety rules</li>
+                    </ul>
+                </div>
+                <div class="highlight-box">
+                    <h3>Option C — Workflow Optimization</h3>
+                    <ul>
+                        <li>Improve multi-step logic</li>
+                        <li>Add validation checkpoints</li>
+                        <li>Update state machine for agent workflows</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 10: Step 6 -->
+            <section>
+                <h2>Step 6: Continuous Evaluation</h2>
+                <ul>
+                    <li>Rerun synthetic evaluators</li>
+                    <li>Re-enable human evaluation templates</li>
+                    <li>Monitor Application Insights traces</li>
+                    <li>Track regression signals and safety drift</li>
+                    <li><strong>Results feed into next iteration → Closed-loop learning</strong></li>
+                </ul>
+            </section>
+
+            <!-- Slide 11: Multi-Agent Extension -->
+            <section>
+                <h2>Multi-Agent Extension</h2>
+                <p>When using Foundry Multi-Agent Workflows:</p>
+                <ul>
+                    <li>Add per-agent evaluators</li>
+                    <li>Score agent handoffs (planner → solver → validator)</li>
+                    <li>Detect breakdowns in cross-agent logic</li>
+                </ul>
+            </section>
+
+            <!-- Slide 12: Operating Model -->
+            <section>
+                <h2>Recommended Operating Model</h2>
+                <ul>
+                    <li><strong>Weekly Evaluation Cycle</strong> (human feedback + synthetic)</li>
+                    <li><strong>Monthly Fine-Tuning Cycle</strong></li>
+                    <li><strong>Continuous Observability Scanning</strong> (latency, safety, failures)</li>
+                    <li><strong>RACI Matrix:</strong>
+                        <ul>
+                            <li>Dev Team (agent design)</li>
+                            <li>SMEs (feedback)</li>
+                            <li>Ops/Sec (evaluation & safety)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Slide 13: Deliverables -->
+            <section>
+                <h2>Deliverables for Production</h2>
+                <ul>
+                    <li>Evaluation strategy & templates</li>
+                    <li>Synthetic evaluation suite</li>
+                    <li>Red Teaming configuration</li>
+                    <li>Training dataset schema for fine-tuning</li>
+                    <li>Versioned prompts + policies</li>
+                    <li>Observability dashboards</li>
+                    <li>Continuous improvement SOP</li>
+                </ul>
+            </section>
+
+            <!-- Slide 14: Visual Diagram -->
+            <section>
+                <h2>Example Visual</h2>
+                <pre class="diagram">
+┌─────────────────────────┐
+│     Human Reviewers     │
+└──────────────┬──────────┘
+               │ Human Feedback
+┌──────────────▼──────────┐
+│ Foundry Human Evaluation │
+└──────────────┬──────────┘
+               │ Metadata + Scores
+┌──────────────▼──────────┐
+│ Synthetic Evaluators     │
+└──────────────┬──────────┘
+               │ Intent / Safety / Tools
+┌──────────────▼──────────┐
+│ Unified Dataset Builder  │
+└──────────────┬──────────┘
+               │ Labels + Expected Outputs
+┌──────────────▼──────────┐
+│  Fine-tuning / Policies  │
+└──────────────┬──────────┘
+               │ Improved Agent
+┌──────────────▼──────────┐
+│   Redeployment Cycle     │
+└──────────────────────────┘
+                </pre>
+            </section>
+
+            <!-- Slide 15: Summary -->
+            <section>
+                <h2>Summary</h2>
+                <ul>
+                    <li>Azure AI Foundry enables ALHF-style learning loops</li>
+                    <li>Human + synthetic feedback = rapid improvement</li>
+                    <li>Fine-tuning optional but powerful</li>
+                    <li>Workflow-level evaluation essential for enterprise agents</li>
+                    <li>Produces safer, more reliable, continuously improving agents</li>
+                </ul>
+            </section>
+
+            <!-- Slide 16: Next Steps -->
+            <section>
+                <h2>Next Steps</h2>
+                <div class="highlight-box">
+                    <p>Ready to generate:</p>
+                    <ul>
+                        <li>A PowerPoint file (downloadable .pptx)</li>
+                        <li>A visual diagram version</li>
+                        <li>A ready-to-present narrative script</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 17: Azure ML Studio Integration -->
+            <section>
+                <h2>How Azure Machine Learning Studio Fits Into the ALHF Loop</h2>
+                <p>Azure Machine Learning Studio complements Azure AI Foundry's agent-level learning by providing model-level automation</p>
+            </section>
+
+            <!-- Slide 17b: What Azure ML Provides -->
+            <section>
+                <h3>What Azure ML Provides</h3>
+                <ul>
+                    <li><strong>Automated ML (AutoML)</strong> — runs parallel pipelines that test algorithms, features, and parameters</li>
+                    <li><strong>Hyperdrive</strong> — automated hyperparameter tuning with sweeps, early termination, and metric-based optimization</li>
+                    <li><strong>Retraining Pipelines & MLOps</strong> — monitor drift, trigger retraining, manage experiment runs, and redeploy models at scale</li>
+                    <li><strong>Responsible AI & Error Analysis</strong> — fairness, explainability, and error analysis tooling</li>
+                </ul>
+            </section>
+
+            <!-- Slide 17c: How It Supports ALHF -->
+            <section>
+                <h3>How It Supports ALHF-Style Learning</h3>
+                <p>Azure ML does not implement agent-level behavioral learning (like Databricks ALHF), but it does provide:</p>
+                <ul>
+                    <li>Fine-tuning pipelines using feedback-generated datasets</li>
+                    <li>Batch evaluation for large-scale agent output scoring</li>
+                    <li>Drift monitoring and retraining of the underlying foundation or finetuned models</li>
+                </ul>
+                <div class="highlight-box">
+                    <p><strong>Azure ML + Foundry together create a full closed-loop system:</strong></p>
+                    <p>Foundry = agent behavior, tool-use accuracy, human/synthetic evaluation</p>
+                    <p>Azure ML = automated model optimization, retraining, and deployment</p>
+                </div>
+            </section>
+
+            <!-- Slide 17d: Combined Loop -->
+            <section>
+                <h3>Resulting Combined Loop</h3>
+                <ol>
+                    <li>Foundry collects agent feedback (human + synthetic)</li>
+                    <li>Feedback is curated into a training dataset</li>
+                    <li>Azure ML runs AutoML / Hyperdrive / fine-tuning</li>
+                    <li>Improved model is registered + deployed back into Foundry</li>
+                    <li>Foundry agents immediately benefit; evaluation repeats</li>
+                </ol>
+                <p><em>This bridges Databricks ALHF-style agent improvement with Azure ML's automated model learning, giving enterprises a complete ecosystem for continuous agent evolution.</em></p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.4/plugin/highlight/highlight.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+        });
+    </script>
+</body>
+</html>
